@@ -1,0 +1,190 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+warnings.filterwarnings('ignore')
+
+# Read Titanic Dataset
+titanic_data = pd.read_csv('titanic_data.csv')
+
+# Display dataset information
+titanic_data.describe()
+titanic_data.info()
+
+font = {
+    'weight': 'bold',
+    'size': 22
+}
+
+# 1. Survival Percentage
+plt.figure(figsize=(12,9))
+titanic_data['Survived'].value_counts(normalize=True).plot(
+    kind='bar', alpha=0.5
+)
+plt.xticks(size=15)
+plt.yticks(size=15)
+plt.xlabel('Survived Or Not')
+plt.ylabel('Percentage')
+plt.title("Survival Percentage", fontdict=font)
+plt.savefig('Survival.png')
+plt.show()
+
+# Check Missing Values
+import numpy as np
+
+print(titanic_data.isnull().any())
+print("age", titanic_data.Age.isna().sum())
+print("cabin", titanic_data.Cabin.isna().sum())
+print("embark", titanic_data.Embarked.isna().sum())
+
+# 2. Age Histogram
+plt.figure(figsize=(12,9))
+titanic_data.Age.hist()
+plt.xticks(size=13)
+plt.yticks(size=13)
+plt.xlabel('Age Of Person')
+plt.ylabel('Number Of People')
+plt.title("Age Count", fontdict=font)
+plt.savefig('Age.png')
+plt.show()
+
+titanic_data.head()
+
+# 3. Number of People Survived
+plt.figure(figsize=(12,9))
+sns.countplot(x='Survived', data=titanic_data)
+label = ['Not Survived', 'Survived']
+plt.xticks(titanic_data['Survived'].unique(), label, size=13)
+plt.yticks(size=13)
+plt.title("Number of People Survived", fontdict=font)
+plt.savefig('survived_people.png')
+plt.show()
+
+# 4. Survival Based on Gender
+plt.figure(figsize=(12,9))
+sns.countplot(x='Survived', hue='Sex', data=titanic_data)
+plt.xticks(size=13)
+plt.yticks(size=13)
+plt.title("Survival On Basis of Gender", fontdict=font)
+plt.legend(loc='best')
+plt.savefig('Survival_gender.png')
+plt.show()
+
+# 5. Survival Based on Passenger Class
+plt.figure(figsize=(12,9))
+sns.countplot(x='Survived', hue='Pclass', data=titanic_data)
+plt.xticks(size=13)
+plt.yticks(size=13)
+plt.title("Survival On Basis of Passenger Class", fontdict=font)
+plt.legend(loc='best')
+plt.savefig('Survival_Pclass.png')
+plt.show()
+
+# Age Plot
+titanic_data['Age'].plot.hist()
+
+# 6. Survival Based on Siblings
+plt.figure(figsize=(12,9))
+sns.countplot(x='Survived', hue='SibSp', data=titanic_data)
+plt.xticks(size=13)
+plt.yticks(size=13)
+plt.title("Survival On Basis of Number of Siblings", fontdict=font)
+plt.legend(loc='best')
+plt.savefig('Survival_sibling.png')
+plt.show()
+
+# 7. Survival Based on Parents and Children
+plt.figure(figsize=(12,9))
+sns.countplot(x='Survived', hue='Parch', data=titanic_data)
+plt.xticks(size=13)
+plt.yticks(size=13)
+plt.title("Survival On Basis of Number of Parch", fontdict=font)
+plt.legend(loc='best')
+plt.savefig('Survival_parch.png')
+plt.show()
+
+# Check Missing Values
+print(titanic_data.isnull().any())
+print(titanic_data.isnull().sum())
+
+# Remove Cabin Column
+titanic_data.drop('Cabin', axis=1, inplace=True)
+
+titanic_data.head()
+
+# Remove Missing Values
+titanic_data.dropna(inplace=True)
+
+print(titanic_data.isnull().sum())
+
+# Convert Categorical Data into Dummy Variables
+Sex = pd.get_dummies(titanic_data['Sex'])
+Sex.head()
+
+Passengerclass = pd.get_dummies(titanic_data['Pclass'])
+Passengerclass.head()
+
+Embark = pd.get_dummies(titanic_data['Embarked'])
+Embark.head()
+
+# Combine Dummy Variables
+titanic_data = pd.concat(
+    [titanic_data, Sex, Passengerclass, Embark], axis=1
+)
+
+titanic_data.head()
+
+# Remove Unnecessary Columns
+titanic_data.drop(
+    ['PassengerId', 'Pclass', 'Name', 'Ticket',
+     'Embarked', 'Sex'],
+    axis=1, inplace=True
+)
+
+titanic_data.head()
+
+# Logistic Regression Model
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X = titanic_data.drop(
+    ['Survived', 'C', 'Q', 'S', 'male'], axis=1
+)
+
+Y = titanic_data.Survived
+
+# Fix column name error
+X.columns = X.columns.astype(str)
+
+print(X.head())
+print(X.shape[0])
+print(Y.shape[0])
+
+# Split Dataset into Training and Testing
+x_train, x_test, y_train, y_test = train_test_split(
+    X, Y, test_size=0.2, random_state=42
+)
+
+# Train Model
+model = LogisticRegression(max_iter=1000)
+model.fit(x_train, y_train)
+
+# Predict Survival
+prediction = model.predict(x_test)
+
+print("Predictions:")
+print(prediction)
+
+# Display Test Data
+x_test.head(3)
+
+# Calculate Accuracy
+from sklearn.metrics import accuracy_score
+
+acc_logreg = round(
+    accuracy_score(y_test, prediction) * 100, 2
+)
+
+print("Logistic Regression Accuracy:", acc_logreg, "%")
+
+print("Titanic Survival Prediction Completed Successfully!")
