@@ -1,0 +1,94 @@
+==========================================================
+DAA-Practical
+==========================================================
+
+===============================
+Practical 6 Quick Sort(Randomized and Deterministic)
+===============================
+
+-----------------------------------------------------------
+import random
+import time
+
+# ---------------------------------------------------------
+# 1. Deterministic Partition (Last element as pivot)
+# ---------------------------------------------------------
+def partition_deterministic(arr, low, high):
+    pivot = arr[high]  # Deterministic choice: last element
+    i = low - 1
+
+    for j in range(low, high):
+        if arr[j] <= pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    return i + 1
+
+def quick_sort_deterministic(arr, low, high):
+    if low < high:
+        pi = partition_deterministic(arr, low, high)
+        quick_sort_deterministic(arr, low, pi - 1)
+        quick_sort_deterministic(arr, pi + 1, high)
+
+# ---------------------------------------------------------
+# 2. Randomized Partition (Random element as pivot)
+# ---------------------------------------------------------
+def partition_randomized(arr, low, high):
+    # Pick a random pivot index and swap with the last element
+    rand_pivot = random.randint(low, high)
+    arr[rand_pivot], arr[high] = arr[high], arr[rand_pivot]
+    
+    return partition_deterministic(arr, low, high)
+
+def quick_sort_randomized(arr, low, high):
+    if low < high:
+        pi = partition_randomized(arr, low, high)
+        quick_sort_randomized(arr, low, pi - 1)
+        quick_sort_randomized(arr, pi + 1, high)
+
+# ---------------------------------------------------------
+# Driver Code to compare performance
+# ---------------------------------------------------------
+if __name__ == "__main__":
+    import sys
+    # Increase recursion depth limit for deterministic worst-case test
+    sys.setrecursionlimit(5000)
+
+    n = 1000
+    print(f"--- Running Comparison for Array Size N = {n} ---")
+
+    # Test 1: Sorted Input Array (Worst case for Deterministic)
+    sorted_arr = list(range(n))
+    
+    arr1 = sorted_arr.copy()
+    start = time.perf_counter()
+    quick_sort_deterministic(arr1, 0, len(arr1) - 1)
+    end = time.perf_counter()
+    print(f"Deterministic Quick Sort (Sorted Array): {end - start:.6f} seconds")
+
+    arr2 = sorted_arr.copy()
+    start = time.perf_counter()
+    quick_sort_randomized(arr2, 0, len(arr2) - 1)
+    end = time.perf_counter()
+    print(f"Randomized Quick Sort    (Sorted Array): {end - start:.6f} seconds")
+
+    # Test 2: Random Unsorted Array (Average case for both)
+    random_arr = [random.randint(1, 10000) for _ in range(n)]
+
+    arr3 = random_arr.copy()
+    start = time.perf_counter()
+    quick_sort_deterministic(arr3, 0, len(arr3) - 1)
+    end = time.perf_counter()
+    print(f"Deterministic Quick Sort (Random Array): {end - start:.6f} seconds")
+
+    arr4 = random_arr.copy()
+    start = time.perf_counter()
+    quick_sort_randomized(arr4, 0, len(arr4) - 1)
+    end = time.perf_counter()
+    print(f"Randomized Quick Sort    (Random Array): {end - start:.6f} seconds")
+
+
+# time complexity D-> O(NlogN)Best O(N^2)worst
+		  R-> O(NlogN)Best O(NlogN)worst
+-------------------------------------------------------------------------------------------------------
