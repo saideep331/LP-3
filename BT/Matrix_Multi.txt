@@ -1,0 +1,72 @@
+
+import threading
+import time
+
+# ---------------------------------------------------------
+# 1. Function to multiply one row of matrix
+# ---------------------------------------------------------
+def multiply_row(A, B, result, row):
+    for j in range(len(B[0])):
+        for k in range(len(B)):
+            result[row][j] += A[row][k] * B[k][j]
+
+
+# ---------------------------------------------------------
+# 2. Matrix Multiplication Using Multithreading
+# ---------------------------------------------------------
+def matrix_multiplication(A, B):
+    rows = len(A)
+    cols = len(B[0])
+
+    result = [[0 for j in range(cols)] for i in range(rows)]
+
+    threads = []
+
+    for i in range(rows):
+        t = threading.Thread(
+            target=multiply_row,
+            args=(A, B, result, i)
+        )
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    return result
+
+
+# ---------------------------------------------------------
+# 3. Driver Code
+# ---------------------------------------------------------
+if __name__ == "__main__":
+
+    A = [
+        [1, 2],
+        [3, 4]
+    ]
+
+    B = [
+        [5, 6],
+        [7, 8]
+    ]
+
+    print("Matrix A:")
+    for row in A:
+        print(row)
+
+    print("Matrix B:")
+    for row in B:
+        print(row)
+
+    start = time.perf_counter()
+
+    result = matrix_multiplication(A, B)
+
+    end = time.perf_counter()
+
+    print("Result of Matrix Multiplication:")
+    for row in result:
+        print(row)
+
+    print("Execution Time:", round(end - start, 6), "seconds")
